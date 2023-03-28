@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "pav_analysis.h"
 #include "vad.h"
 
 const float FRAME_TIME = 10.0F; /* in ms. */
@@ -11,6 +11,7 @@ const float FRAME_TIME = 10.0F; /* in ms. */
  * only this labels are needed. You need to add all labels, in case
  * you want to print the internal state in string format
  */
+
 
 const char *state_str[] = {
   "UNDEF", "S", "V", "INIT"
@@ -42,7 +43,9 @@ Features compute_features(const float *x, int N) {
    * For the moment, compute random value between 0 and 1 
    */
   Features feat;
-  feat.zcr = feat.p = feat.am = (float) rand()/RAND_MAX;
+  //Gener numeros aleatorios
+  //feat.zcr = feat.p = feat.am = (float) rand()/RAND_MAX;
+  feat.p = compute_power(x,N);
   return feat;
 }
 
@@ -50,11 +53,12 @@ Features compute_features(const float *x, int N) {
  * TODO: Init the values of vad_data
  */
 
-VAD_DATA * vad_open(float rate) {
+VAD_DATA * vad_open(float rate, float alfa0) {
   VAD_DATA *vad_data = malloc(sizeof(VAD_DATA));
   vad_data->state = ST_INIT;
   vad_data->sampling_rate = rate;
   vad_data->frame_length = rate * FRAME_TIME * 1e-3;
+  vad_data->alfa0=alfa0;
   return vad_data;
 }
 
@@ -84,21 +88,25 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x) {
    * program finite state automaton, define conditions, etc.
    */
 
+  //f.p es la potencia de la trama
+
   Features f = compute_features(x, vad_data->frame_length);
   vad_data->last_feature = f.p; /* save feature, in case you want to show */
 
   switch (vad_data->state) {
-  case ST_INIT:
-    vad_data->state = ST_SILENCE;
+  case ST_INIT: //Es la primera trama
+    vad_data->state = ST_SILENCE; 
+    vad_data->P0=f.p;
     break;
 
   case ST_SILENCE:
-    if (f.p > 0.95)
+    if (f.p > vad_data->P0 + vad_data->alfa0)//Marcamos un umbral de ruido que no lo detecte
       vad_data->state = ST_VOICE;
+     //vad_data->P0=f.p; 
     break;
 
   case ST_VOICE:
-    if (f.p < 0.01)
+    if (f.p < vad_data->P0 + vad_data->alfa0)
       vad_data->state = ST_SILENCE;
     break;
 
