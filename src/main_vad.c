@@ -28,13 +28,23 @@ int main(int argc, char *argv[]) {
   char	*input_wav, *output_vad, *output_wav;
 
   DocoptArgs args = docopt(argc, argv, /* help */ 1, /* version */ "2.0");
+  //La línea de código que has proporcionado usa la biblioteca Docopt para analizar los argumentos de línea de comando en un programa de C. 
+  //La función docopt se utiliza para
+  // analizar los argumentos y devuelve una estructura DocoptArgs que contiene los valores de los argumentos. 
+  //argc i agrv porten la informació a llegir
+
+  //Extraiem totes les variables possibles de la trama que ens hem guardat a args
 
   verbose    = args.verbose ? DEBUG_VAD : 0;
+//La variable args.verbose --> Si el argumento verbose está presente, args.verbose será true, de lo contrario será false.
+//si el argumento verbose está presente, el nivel de verbosidad se establecerá en DEBUG_VAD, de lo contrario se establecerá en 0.
+
   input_wav  = args.input_wav;
   output_vad = args.output_vad;
   output_wav = args.output_wav;
-  alfa0 = atof(args.alfa0);
+  alfa0 = atof(args.alfa0); //Convertim d'un string a un float
 
+//Error en la lectura
   if (input_wav == 0 || output_vad == 0) {
     fprintf(stderr, "%s\n", args.usage_pattern);
     return -1;
@@ -65,15 +75,21 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  vad_data = vad_open(sf_info.samplerate,alfa0);
+//Després d'analitzar que no tinguessim errors a l'obrir la trama
+  vad_data = vad_open(sf_info.samplerate,alfa0); //apliquem la funció per crear una nova variable vad_data
   /* Allocate memory for buffers */
-  frame_size   = vad_frame_size(vad_data);
-  buffer       = (float *) malloc(frame_size * sizeof(float));
+  frame_size   = vad_frame_size(vad_data); //N'extreiem la info de tamany
+  buffer       = (float *) malloc(frame_size * sizeof(float)); //Reservem un espai de memòria pel buffer. El tamany de
+                                                              //element s'especifica amb sizeof(float) que ho converteix a bytes
+                                                              //i passem el resultat finalemt a un puntero de tipus float. 
+                                                              //El número d'espai en bytses per poder-lo guardar es passa a flotant
   buffer_zeros = (float *) malloc(frame_size * sizeof(float));
-  for (i=0; i< frame_size; ++i) buffer_zeros[i] = 0.0F;
+
+
+  for (i=0; i< frame_size; ++i) buffer_zeros[i] = 0.0F; //Posem tots els valors a 0 del buffer_zero[i].
 
   frame_duration = (float) frame_size/ (float) sf_info.samplerate;
-  last_state = ST_UNDEF;
+  last_state = ST_UNDEF; //Inicialment marquem com estat anterior coma ST_UNDEF 
 
   for (t = last_t = 0; ; t++) { /* For each frame ... */
     /* End loop when file has finished (or there is an error) */
@@ -84,6 +100,8 @@ int main(int argc, char *argv[]) {
     }
 
     state = vad(vad_data, buffer);
+
+    //SI verbose és del tipis DEBUG_VAD mostrem estat en què estem
     if (verbose & DEBUG_VAD) vad_show_state(vad_data, stdout);
 
     /* TODO: print only SILENCE and VOICE labels */

@@ -11,14 +11,16 @@ const char *state2str(VAD_STATE st);
 /* TODO: add the variables needed to control the VAD 
    (counts, thresholds, etc.) */
 
+//Establim totes les variables necessàries per crear un objecte VAD_DATA
 typedef struct {
-  VAD_STATE state;
-  float sampling_rate;
-  unsigned int frame_length;
+  VAD_STATE state; //Estat de la trama
+  float sampling_rate; //Freqüència de mostreig de la trama
+  unsigned int frame_length; //FNúmer de mostres de la trama
   float last_feature; /* for debuggin purposes */
-  float alfa0;
-  float P0;
+  float alfa0; //Umbral de decisió de la trama
+  float P0; //Potència umbral de la trama
   
+  //Umbral K1 = K0 + alpha0
 } VAD_DATA;
 
 /* Call this function before using VAD: 
