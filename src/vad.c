@@ -59,13 +59,14 @@ Features compute_features(const float *x, int N) {
  umbral per decidir si és trama de so o no.
  */
 
-VAD_DATA * vad_open(float rate, float alfa0) {
+VAD_DATA * vad_open(float rate, float alfa0, float alfa1) {
   VAD_DATA *vad_data = malloc(sizeof(VAD_DATA)); //Assigna memòria per l'estructura VAS_DATA
   vad_data->state = ST_INIT; //Estableix que estem a l'estat inicial
   vad_data->sampling_rate = rate; // Estableix quina és la freüència de mostreig
   vad_data->frame_length = rate * FRAME_TIME * 1e-3; //Càlcul de la longitud de la trama a partir d'una longitud 
                                                     //igual per a totes les trames (predifinida a dalt)
   vad_data->alfa0=alfa0; // estableix el valor umbral de la senyal
+  vad_data->alfa1=alfa1;
   return vad_data;
 }
 
@@ -105,24 +106,38 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x) {
   vad_data->last_feature = f.p; /* save feature, in case you want to show */
                                 //Ens guardem la potència en una variable per fer-la disponible en el programa principal
                                 //Es una variable de pas abans de decidir en quin estat es troba
+
+                        
   switch (vad_data->state) {
   case ST_INIT: //Es la primera trama
-    vad_data->state = ST_SILENCE; 
+    vad_data->state = MY_SILENCE; 
     vad_data->P0=f.p; //Quin serà el valor d epotència umbral de la trama
     break;
 
   case ST_SILENCE:
-    if (f.p > vad_data->P0 + vad_data->alfa0)//Marcamos un umbral de ruido que no lo detecte
-      vad_data->state = ST_VOICE;
+    if (f.p > vad_data->P0 + vad_data->alfa0){//Marcamos un umbral de ruido que no lo detecte
+      vad_data->state = MY_VOICE;
+    }
      //vad_data->P0=f.p; 
     break;
-
+  
   case ST_VOICE:
-    if (f.p < vad_data->P0 + vad_data->alfa0)
-      vad_data->state = ST_SILENCE;
+    if (f.p < vad_data->P0 + vad_data->alfa0+ vad_data->alfa1)
+      vad_data->state = MY_SILENCE;
     break;
 
-  case ST_UNDEF:
+  case MY_SILENCE:
+     if (f.p > vad_data->P0 + vad_data->alfa0){
+      vad_data->state = MY_VOICE;
+    }
+    break;
+
+     case MY_VOICE:
+      if (f.p < vad_data->P0 + vad_data->alfa0){
+      vad_data->state = ST_SILENCE;
+      }else{
+      vad_data->state = ST_VOICE;
+      }
     break;
   }
 

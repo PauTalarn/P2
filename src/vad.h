@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 /* TODO: add the needed states */
-typedef enum {ST_UNDEF=0, ST_SILENCE, ST_VOICE, ST_INIT} VAD_STATE;
+typedef enum {ST_UNDEF=0, ST_SILENCE, ST_VOICE, ST_INIT, MY_SILENCE, MY_VOICE} VAD_STATE;
 
 /* Return a string label associated to each state */
 const char *state2str(VAD_STATE st);
@@ -18,9 +18,11 @@ typedef struct {
   unsigned int frame_length; //FNúmer de mostres de la trama
   float last_feature; /* for debuggin purposes */
   float alfa0; //Umbral de decisió de la trama
+  float alfa1;
   float P0; //Potència umbral de la trama
   
   //Umbral K1 = K0 + alpha0
+  // K0 = P0 + alpha1
 } VAD_DATA;
 
 /* Call this function before using VAD: 
