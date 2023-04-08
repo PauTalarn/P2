@@ -12,6 +12,8 @@ Options:
    -0 FLOAT, --alfa0=FLOAT  Marge sobre P0 per determinar el llindar V/5 [default: 5]
    -1 FLOAT, --alfa1=FLOAT  Marge sobre P1 per determinar el llindar V/5 [default: 5]
    -n FLOAT, --num_init=FLOAT  Numero de trames inicialitzar [default: 1]
+   -j INT, --num_MS=INT  Número de maybesilence que permetem [default: 2]
+   -f INT, --num_MV=INT  Número de maybesilence que permetem [default: 1]
    -v, --verbose  Show debug information
    -h, --help     Show this screen
    --version      Show the version of the project

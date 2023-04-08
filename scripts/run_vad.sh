@@ -1,12 +1,14 @@
 #!/bin/bash
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 5 ]; then
     echo "Usage: $0 missing parameters"
     exit -1
 fi
     alfa0=$1
     alfa1=$2
     num_init=$3
+    num_MS=$4
+    num_MV=$5
 
 # Be sure that this file has execution permissions:
 # Use the nautilus explorer or chmod +x run_vad.sh
@@ -14,7 +16,7 @@ fi
 # Write here the name and path of your program and database
 DIR_P2=$HOME/PAV/P2
 DB=$DIR_P2/db.v4
-CMD="$DIR_P2/bin/vad --alfa0=$alfa0 --alfa1=$alfa1 --num_init=$num_init"
+CMD="$DIR_P2/bin/vad --alfa0=$alfa0 --alfa1=$alfa1 --num_init=$num_init --num_MS=$num_MS --num_MV=$num_MV"
 
 for filewav in $DB/*/*wav; do
 #    echo

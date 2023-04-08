@@ -5,6 +5,7 @@
 #include "vad.h"
 
 const float FRAME_TIME = 20.0F; /* in ms. */
+int cont=0;
 
 /*
  * As the output state is only ST_VOICE, ST_SILENCE, or ST_UNDEF,
@@ -67,7 +68,7 @@ Features compute_features(const float *x, int N)
  umbral per decidir si és trama de so o no.
  */
 
-VAD_DATA *vad_open(float rate, float alfa0, float alfa1, float num_init)
+VAD_DATA *vad_open(float rate, float alfa0, float alfa1, float num_init, int num_MV, int num_MS)
 {
   VAD_DATA *vad_data = malloc(sizeof(VAD_DATA));     // Assigna memòria per l'estructura VAS_DATA
   vad_data->state = ST_INIT;                         // Estableix que estem a l'estat inicial
@@ -78,6 +79,8 @@ VAD_DATA *vad_open(float rate, float alfa0, float alfa1, float num_init)
   //printf("%d\n", vad_data->frame_length);
   vad_data->alfa1 = alfa1;
   vad_data->num_init = num_init;
+  vad_data->num_MV=num_MV;
+  vad_data->num_MS=num_MS;
   return vad_data;
 }
 
@@ -87,6 +90,7 @@ VAD_STATE vad_close(VAD_DATA *vad_data)
    * TODO: decide what to do with the last undecided frames
    */
   VAD_STATE state = vad_data->last_state; // Extraiem l'estat final de l'última trama
+  printf("cont= %d\n", cont);
 
   free(vad_data); // la memoria asignada para la estructura VAD_DATA a
                   // través de malloc será liberada y se puede reutilizar para otros fines en el programa
@@ -137,12 +141,15 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
     else
     {
       vad_data->P0 = 10 * log10(vad_data->pot_total / t) + vad_data->alfa0;
-      vad_data->P1 = 10 * log10(vad_data->pot_total / t) + vad_data->alfa1;
-     //printf("P0=%f \n", vad_data->P0);
+      vad_data->P1 = vad_data->P0 +  vad_data->alfa1;
+      //vad_data->P1 = 10 * log10(vad_data->pot_total / t) + vad_data->alfa1;
+    //printf("P0=%f \n", vad_data->P0);
      //printf("alfa0=%f \n", vad_data->alfa0);
      //printf("P1=%f \n", vad_data->P1);
      //printf("alfa1=%f \n", vad_data->alfa1);
+    
       vad_data->zcr = vad_data->zcr / t; // A partir del num de creuaments per zero busquem la tassa
+      printf("zcr=%f \n", vad_data->zcr);
       vad_data->state = ST_SILENCE;
     }
     /*vad_data->state = MY_SILENCE;
@@ -163,7 +170,11 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
   case ST_VOICE:
     // printf("Estic estat voice");
     //printf("%f\n", f.p);
-    vad_data->indef = 0;
+    /*ad_data->indef = 0;
+
+    if(f.p < vad_data->P1){
+    printf("f.zcr= %f\n", f.zcr);
+    }*/
     if (f.p < vad_data->P1 && vad_data->zcr > f.zcr)
     {
       vad_data->state = MY_SILENCE;
@@ -181,8 +192,9 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
     {
       vad_data->state = ST_VOICE;
     }
-    else if (vad_data->indef > 1)
+    else if (vad_data->indef > vad_data->num_MS)
     {
+      //printf("num_MS= %d\n", vad_data->num_MS);
       vad_data->state = ST_VOICE; // Si després de dos iteracions al maybe no ens dona cap resultat torem a la veu
     }
     break;
@@ -198,8 +210,11 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
     {
       vad_data->state = ST_SILENCE;
     }
-    else if (vad_data->indef > 1)
+    else if (vad_data->indef > vad_data->num_MV)
     {
+       printf("num_MV= %d\n", vad_data->num_MV);
+      //printf("Hem entrat a indef\n");
+      cont++;
       vad_data->state = ST_SILENCE; // Si després de dos iteracions al maybe no ens dona cap resultat torem al silenci
     }
     break;
@@ -212,7 +227,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
   {
     return vad_data->state;
   }
-  else if (vad_data->state == ST_INIT)
+  else //if (vad_data->state == ST_INIT)
   {
     return ST_SILENCE;
   }
@@ -224,4 +239,5 @@ void vad_show_state(const VAD_DATA *vad_data, FILE *out)
 }
 
 
-//Millor 10.3.5
+//Millor 10 3 5 --> Sense forçar umbral
+//Millor 3 3 5 --> Forçant l'umbral

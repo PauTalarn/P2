@@ -27,6 +27,8 @@ int main(int argc, char *argv[])
   float alfa0;
   float alfa1;
   float num_init;
+  int num_MS;
+  int num_MV;
 
   char *input_wav, *output_vad, *output_wav;
 
@@ -49,6 +51,8 @@ int main(int argc, char *argv[])
   alfa1 = atof(args.alfa1);
   //printf("%f\n", alfa1);
   num_init = atof(args.num_init);
+  num_MS=atof(args.num_MS);
+  num_MV=atof(args.num_MV);
 
   // Error en la lectura
   if (input_wav == 0 || output_vad == 0)
@@ -88,7 +92,7 @@ int main(int argc, char *argv[])
   }
 
   // Després d'analitzar que no tinguessim errors a l'obrir la trama
-  vad_data = vad_open(sf_info.samplerate, alfa0, alfa1, num_init); // apliquem la funció per crear una nova variable vad_data
+  vad_data = vad_open(sf_info.samplerate, alfa0, alfa1, num_init, num_MV, num_MS); // apliquem la funció per crear una nova variable vad_data
   /* Allocate memory for buffers */
   frame_size = vad_frame_size(vad_data);
   //printf("%d\n", frame_size);                           // N'extreiem la info de tamany
