@@ -10,7 +10,7 @@ float compute_power(const float *x, unsigned int N)
     }
     res = 10 * log10(pot / N);
     return res;
-    return 0;
+    //return 0;
 }
 
 float compute_am(const float *x, unsigned int N)
