@@ -43,9 +43,9 @@ const char help_message[] =
 "   -w FILE, --output-wav=FILE  WAVE file with silences cleared\n"
 "   -0 FLOAT, --alfa0=FLOAT  Marge sobre P0 per determinar el llindar V/5 [default: 5]\n"
 "   -1 FLOAT, --alfa1=FLOAT  Marge sobre P1 per determinar el llindar V/5 [default: 5]\n"
-"   -n FLOAT, --num_init=FLOAT  Numero de trames inicialitzar [default: 1]\n"
-"   -j INT, --num_MS=INT  Número de maybesilence que permetem [default: 2]\n"
-"   -f INT, --num_MV=INT  Número de maybesilence que permetem [default: 1]\n"
+"   -n FLOAT, --num_init=FLOAT  Numero de trames inicialitzar [default: 5]\n"
+"   -j FLOAT, --num_MS=FLOAT  Número de maybesilence que permetem [default: 2]\n"
+"   -f FLOAT, --num_MV=FLOAT  Número de maybesilence que permetem [default: 1]\n"
 "   -v, --verbose  Show debug information\n"
 "   -h, --help     Show this screen\n"
 "   --version      Show the version of the project\n"
@@ -325,7 +325,7 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
 DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
     DocoptArgs args = {
         0, 0, 0, (char*) "5", (char*) "5", NULL, (char*) "2", (char*) "1",
-        (char*) "1", NULL, NULL,
+        (char*) "5", NULL, NULL,
         usage_pattern, help_message
     };
     Tokens ts;

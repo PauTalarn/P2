@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
   float alfa0;
   float alfa1;
   float num_init;
-  int num_MS;
-  int num_MV;
+  float num_MS;
+  float num_MV;
 
   char *input_wav, *output_vad, *output_wav;
 
@@ -53,7 +53,6 @@ int main(int argc, char *argv[])
   num_init = atof(args.num_init);
   num_MS=atof(args.num_MS);
   num_MV=atof(args.num_MV);
-
   // Error en la lectura
   if (input_wav == 0 || output_vad == 0)
   {
@@ -96,10 +95,7 @@ int main(int argc, char *argv[])
   /* Allocate memory for buffers */
   frame_size = vad_frame_size(vad_data);
   //printf("%d\n", frame_size);                           // N'extreiem la info de tamany
-  buffer = (float *)malloc(frame_size * sizeof(float)); // Reservem un espai de memòria pel buffer. El tamany de
-                                                        // element s'especifica amb sizeof(float) que ho converteix a bytes
-                                                        // i passem el resultat finalemt a un puntero de tipus float.
-                                                        // El número d'espai en bytses per poder-lo guardar es passa a flotant
+  buffer = (float *)malloc(frame_size * sizeof(float));
   buffer_zeros = (float *)malloc(frame_size * sizeof(float));
 
   for (i = 0; i < frame_size; ++i)
@@ -126,7 +122,10 @@ int main(int argc, char *argv[])
     }
 
     state = vad(vad_data, buffer, t);
-
+    
+    if(vad_data->indef!=0){
+   //printf("indef= %d \n", vad_data->indef);
+    }
     // SI verbose és del tipis DEBUG_VAD mostrem estat en què estem
     if (verbose & DEBUG_VAD)
     {
@@ -140,12 +139,12 @@ int main(int argc, char *argv[])
       if (state == ST_VOICE)
       {
         last_state = ST_VOICE;
-        vad_data->last_state = ST_VOICE; // Per tal que l'últim valor que surti al fer close no sigui una maybe
+        //vad_data->last_state = ST_VOICE; // Per tal que l'últim valor que surti al fer close no sigui una maybe
       }
       else if (state == ST_SILENCE)
       {
         last_state = ST_SILENCE;
-        vad_data->last_state = ST_SILENCE;
+        //vad_data->last_state = ST_SILENCE;
       }
 
       if (t != last_t)
