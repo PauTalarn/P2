@@ -41,14 +41,16 @@ const char help_message[] =
 "   -i FILE, --input-wav=FILE   WAVE file for voice activity detection\n"
 "   -o FILE, --output-vad=FILE  Label file with the result of VAD\n"
 "   -w FILE, --output-wav=FILE  WAVE file with silences cleared\n"
-"   -0 FLOAT, --alfa0=FLOAT  Marge sobre P0 per determinar el llindar V/5 [default: 5]\n"
-"   -1 FLOAT, --alfa1=FLOAT  Marge sobre P1 per determinar el llindar V/5 [default: 5]\n"
+"   -0 FLOAT, --alfa0=FLOAT  Marge sobre P0 per determinar el llindar V/5 [default: 10]\n"
+"   -1 FLOAT, --alfa1=FLOAT  Marge sobre P1 per determinar el llindar V/5 [default: 3]\n"
 "   -n FLOAT, --num_init=FLOAT  Numero de trames inicialitzar [default: 5]\n"
-"   -j FLOAT, --num_MS=FLOAT  Número de maybesilence que permetem [default: 2]\n"
-"   -f FLOAT, --num_MV=FLOAT  Número de maybesilence que permetem [default: 1]\n"
+"   -j FLOAT, --num_MS=FLOAT  Número de maybesilence que permetem [default: 0.08]\n"
+"   -f FLOAT, --num_MV=FLOAT  Número de maybesilence que permetem [default: 0.02]\n"
 "   -v, --verbose  Show debug information\n"
 "   -h, --help     Show this screen\n"
 "   --version      Show the version of the project\n"
+"\n"
+"\n"
 "";
 
 const char usage_pattern[] =
@@ -324,8 +326,8 @@ int elems_to_args(Elements *elements, DocoptArgs *args, bool help,
 
 DocoptArgs docopt(int argc, char *argv[], bool help, const char *version) {
     DocoptArgs args = {
-        0, 0, 0, (char*) "5", (char*) "5", NULL, (char*) "2", (char*) "1",
-        (char*) "5", NULL, NULL,
+        0, 0, 0, (char*) "10", (char*) "3", NULL, (char*) "0.08", (char*)
+        "0.02", (char*) "5", NULL, NULL,
         usage_pattern, help_message
     };
     Tokens ts;
