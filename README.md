@@ -187,7 +187,8 @@ Obtenim els següents persentatges:
 
 - Evalúe los resultados sobre la base de datos `db.v4` con el script `vad_evaluation.pl` e inserte a 
   continuación las tasas de sensibilidad (*recall*) y precisión para el conjunto de la base de datos (sólo el resumen).
-Podem observar que posant els següents valors com a paràmetres:
+
+  Podem observar que posant els següents valors com a paràmetres:
 
 * alfa0= 9.9
 * alfa1= 3.3
@@ -224,8 +225,7 @@ Obtenim els següents persentatges:
   }
   ```
 
-
-  I, si durant les iteracions de trames en trobem alguna que ens porta a silenci, apliquem:
+  I, si durant les iteracions de trames en trobem  a silenci, apliquem:
   ```c
   if (sndfile_out != 0 && state == ST_SILENCE)
     {
@@ -259,18 +259,17 @@ Obtenim els següents persentatges:
 
   El nostre codi es vertebra bàsicament per tres canvis importants que influencien fortament el resultat final del detector.
 
-1. El primer canvi important és la forma en què es calcula la potència. En el nostre cas no agafe directament la potència de la primera trama com a llindar de potència sinó que fem una mitja de potència de les "num_init" trames. A més a més, posteriorment fem el càlcul dels llindars de detecció:
+1. El primer canvi important és la forma en què es calcula la potència. En el nostre cas no agafa directament la potència de la primera trama com a llindar de potència sinó que fem una mitja de potència de les "num_init" trames. A més a més, a partir d'aquesta mitja, fem el càlcul dels llindars de detecció:
   ```c
-  P0= Mitja_de_la_potència * alfa0;
+  //P0= Mitja_de_la_potència * alfa0;
   vad_data->P0 = 10 * log10(vad_data->pot_total / t) + vad_data->alfa0;
   P1= Mitja_de_la_potència * alfa1;
   vad_data->P1 = 10 * log10(vad_data->pot_total / t) + vad_data->alfa1;
   ````
 
-2. A més a més, en el nostre cas s'afegeix un control d'encreuaments per zero per tal de no identificar com a silenci una trama sords amb un nivell de potència baix. Com què els sons sords tenen un zcr molt gran ens permet identificar-los fàcilment. Però, igual que amb la potència, per calcular el llindar, no agafem el valor de la primera trama sinó que fem una mitjana de les "num_init" primeres trames. A aquesta mitja, hi hem afegit un valor beta imposat per l'usuari per tal de fer més eficient el sistema. Quan estem en una trama de veu i la potència és més baixa que el valor llindar, però té una tassa d'encreuaments per zero superiors que la del llindar, fem que aquesta es mantingui a veu.
+2. A més a més, en el nostre cas s'afegeix un control d'encreuaments per zero per tal de no identificar com a silenci una trama sorda amb un nivell de potència baix. Com què els sons sords tenen un zcr molt gran ens permet identificar-los fàcilment. Però, igual que amb la potència, per calcular el llindar, no agafem el valor de la primera trama sinó que fem una mitjana de les "num_init" primeres trames. A aquesta mitja, hi hem afegit un valor beta imposat per l'usuari per tal de fer més eficient el sistema a partir del prova i error. Quan estem en una trama de veu i la potència és més baixa que el valor llindar P1 però té una tassa d'encreuaments per zero superiors que la del llindar f.zcr-30, fem que aquesta es mantingui a veu.
  ```c
  case ST_VOICE:
-  printf("Estat: ST_Voice\n");
   vad_data->indef = 0;
    
     if (f.p < vad_data->P1 && vad_data->zcr > f.zcr-30)
@@ -282,18 +281,12 @@ Obtenim els següents persentatges:
     break;
  `````
 
-3. Un sistema per ser robustos dabant de sorolls de poca duració o de silencis curts entre lletres. Per aquesta raó s’han creat dos nous estats, MY_SILENCE i el MY_VOICE. Permetem que l’estat en que es trobi la trama en un cert moment estigui indefinit durant un cert període de temps que indica l’usuari mitjançant els “”Num_MS” i els “Num_MV”. Si durant aquets trams de trànsit la senyal torna a recuperar els valors que tenia abans, fem que la trama torni a l’estat que estava anteriorment i es posa les trames que han estat marcades com indefinides a l’estat en aquest estat anterior. Si, per contra, la següent trama continua amb valors diferents als mmarcat per l’umbral, aquesta se’sepra un cert temps abans prendre la decisió de canviar de l’estat en què estava a l’altre. 
+3. Un sistema per ser robust davant de sorolls de poca duració o de silencis curts entre lletres. Per aquesta raó s’han creat dos nous estats, MY_SILENCE i el MY_VOICE. Permetem que l’estat en que es trobi la trama en un cert moment estigui indefinit durant un cert període de temps que indica l’usuari mitjançant els “Num_MS” i els “Num_MV”. Si durant aquets trams de trànsit la senyal torna a recuperar els valors que tenia abans, fem que la trama torni a l’estat que estava anteriorment i es posa les trames que han estat marcades com indefinides en aquest estat anterior. Si, per contra, la següent trama continua amb valors diferents als marcat per l’umbral, aquesta s´espera un cert temps abans de prendre la decisió de canviar a l’estat oposat al què es trovaba i posar les trames indefinides a aquest nou estat (o silenci o veu). 
 ```c
 case MY_VOICE:
-  printf("Estat: My_VOICE\n");
     if (f.p > vad_data->P1){
-    printf("indef= %d \n", vad_data->indef);
-     printf("%f \n", vad_data->num_MV);
-     printf("%f \n", vad_data->indef*vad_data->frame_length/vad_data->sampling_rate);
       if(vad_data->indef*vad_data->frame_length/vad_data->sampling_rate < vad_data->num_MV){
         vad_data->indef++;
-
-        printf("Sumo");
     }else{
       vad_data->state = ST_VOICE;
       vad_data->indef= 0;
