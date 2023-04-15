@@ -245,4 +245,5 @@ void vad_show_state(const VAD_DATA *vad_data, FILE *out)
 
 
 //scripts/run_vad.sh 10 3 5 0.08 0.02--> Sense forçar umbral
+//bin/vad -i pav2152.wav -o pav2152.vad -0 19 -1 9 -n 7 -j 0.08 -f 0.02
 //Millor 3 3 5 --> Forçant l'umbral

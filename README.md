@@ -190,3 +190,11 @@ Ejercicios
 Recuerde comprobar que el repositorio cuenta con los códigos correctos y en condiciones de ser 
 correctamente compilados con la orden `meson bin; ninja -C bin`. El programa generado (`bin/vad`) será
 el usado, sin más opciones, para realizar la evaluación *ciega* del sistema.
+
+
+
+
+
+### Implementació del detector de veu
+Per tal d'implementar el detector de veu s'han creat nous estats i hem passat a treballar amb 5 estats diferents:
+* 
