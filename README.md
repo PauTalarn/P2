@@ -225,7 +225,7 @@ Obtenim els següents persentatges:
   }
   ```
 
-  I, si durant les iteracions de trames en trobem  a silenci, apliquem:
+  I, si durant les iteracions de trames ens trobem  a silenci, apliquem:
   ```c
   if (sndfile_out != 0 && state == ST_SILENCE)
     {
