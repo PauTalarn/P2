@@ -64,7 +64,7 @@ VAD_DATA *vad_open(float rate, float alfa0, float alfa1, float num_init, float n
   vad_data->frame_length = rate * FRAME_TIME * 1e-3; // Càlcul de la longitud de la trama a partir d'una longitud
                                                   
   vad_data->alfa0 = alfa0;                          
-  //printf("%d\n", vad_data->frame_length);
+
   vad_data->alfa1 = alfa1;
   vad_data->num_init = num_init;
   vad_data->num_MV=num_MV;
@@ -89,17 +89,14 @@ unsigned int vad_frame_size(VAD_DATA *vad_data)
   return vad_data->frame_length;
 }
 
-/*
- * TODO: Implement the Voice Activity Detection
- * using a Finite State Automata
- */
+
 
 VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
 {
   // f.p es la potencia de la trama
 
   Features f = compute_features(x, vad_data->frame_length);
-  //printf("f.p=%f \n",f.p);                                
+                           
                                                         
   vad_data->last_feature = f.p;                            
                                                            
@@ -107,7 +104,6 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
   switch (vad_data->state)
   {
   case ST_INIT: // Es la primera trama
-  printf("Estat: ST_Init\n");
     if (t < vad_data->num_init)
     {
        
@@ -117,14 +113,13 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
     else
     {
       vad_data->P0 = 10 * log10(vad_data->pot_total / t) + vad_data->alfa0;
-      //vad_data->P1 = vad_data->P0 +  vad_data->alfa1;
       vad_data->P1 = 10 * log10(vad_data->pot_total / t) + vad_data->alfa1;
       vad_data->zcr = vad_data->zcr / t; // A partir del num de creuaments per zero busquem la tassa
       vad_data->state = ST_SILENCE;
     }
     break;
   case ST_SILENCE:
-  printf("Estat: ST_Silence\n");
+
     vad_data->indef = 0;
     if (f.p > vad_data->P0)
     { // Marcamos un umbral de ruido que no lo detecte
@@ -134,7 +129,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
     break;
 
   case ST_VOICE:
-  printf("Estat: ST_Voice\n");
+
     vad_data->indef = 0;
    
     if (f.p < vad_data->P1 && vad_data->zcr > f.zcr-30)
@@ -146,54 +141,32 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
     break;
 
   case MY_SILENCE:
-  printf("Estat: My_Silence\n");
+
   if (f.p < vad_data->P0 && vad_data->zcr > f.zcr-30){
-     printf("indef= %d \n", vad_data->indef);
-     printf("%f \n", vad_data->num_MS);
-     printf("%f \n", vad_data->indef*vad_data->frame_length/vad_data->sampling_rate);
+
       if(vad_data->indef*vad_data->frame_length/vad_data->sampling_rate < vad_data->num_MS){
         vad_data->indef++;
-       
-       printf("Sumo\n");
+
       }
       else{
       vad_data->state = ST_SILENCE;
        vad_data->indef= 0;
-       printf("Canvi a estat silenci");
 
       }
     }else if (f.p > vad_data->P0){
       vad_data->indef= 0;
       vad_data->state = ST_VOICE;
-      printf("Canvi a estat VOICE");
+ 
     }
 
-    /*vad_data->indef += 1;
-    if (f.p < vad_data->P0)
-    {
-      vad_data->state = ST_SILENCE;
-    }
-    else if (f.p > vad_data->P1)
-    {
-      vad_data->state = ST_VOICE;
-    }
-    else if (vad_data->indef > vad_data->num_MS)
-    {
-      //printf("num_MS= %d\n", vad_data->num_MS);
-      vad_data->state = ST_VOICE; // Si després de dos iteracions al maybe no ens dona cap resultat torem a la veu
-    }*/
     break;
 
   case MY_VOICE:
-  printf("Estat: My_VOICE\n");
+
     if (f.p > vad_data->P1){
-    printf("indef= %d \n", vad_data->indef);
-     printf("%f \n", vad_data->num_MV);
-     printf("%f \n", vad_data->indef*vad_data->frame_length/vad_data->sampling_rate);
+   
       if(vad_data->indef*vad_data->frame_length/vad_data->sampling_rate < vad_data->num_MV){
         vad_data->indef++;
-
-        printf("Sumo");
     }else{
       vad_data->state = ST_VOICE;
       vad_data->indef= 0;
@@ -202,22 +175,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
       vad_data->indef = 0;
       vad_data->state = ST_SILENCE;
     }
-    /*vad_data->indef += 1;
-    if (f.p > vad_data->P1)
-    {
-      vad_data->state = ST_VOICE;
-    }
-    else if (f.p < vad_data->P0)
-    {
-      vad_data->state = ST_SILENCE;
-    }
-    else if (vad_data->indef > vad_data->num_MV)
-    {
-       //printf("num_MV= %d\n", vad_data->num_MV);
-      //printf("Hem entrat a indef\n");
-      cont++;
-      vad_data->state = ST_SILENCE; // Si després de dos iteracions al maybe no ens dona cap resultat torem al silenci
-    }*/
+
     break;
   }
 
@@ -226,10 +184,6 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x, unsigned int t)
       vad_data->state == MY_SILENCE ||
       vad_data->state == MY_VOICE)
   {
-    /*if(vad_data->state==ST_SILENCE)printf("L'hi passem l'estat: ST_SILENCE\n");
-    else if(vad_data->state==ST_VOICE)printf("L'hi passem l'estat: ST_VOICE\n");
-     else if(vad_data->state==MY_SILENCE)printf("L'hi passem l'estat: MY_SILENCE\n");
-      else if(vad_data->state==MY_SILENCE)printf("L'hi passem l'estat: MY_VOICE\n");*/
     return vad_data->state;
   }
   else

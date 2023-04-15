@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     state = vad(vad_data, buffer, t);
     
     if(vad_data->indef!=0){
-   //printf("indef= %d \n", vad_data->indef);
+
     }
     // SI verbose és del tipis DEBUG_VAD mostrem estat en què estem
     if (verbose & DEBUG_VAD)
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
     /* As it is, it prints UNDEF segments but is should be merge to the proper value */
     if (state != last_state)
     {
-      //printf("%d\n", t);
+
       if (state == ST_VOICE)
       {
         last_state = ST_VOICE;
@@ -150,7 +150,6 @@ int main(int argc, char *argv[])
       if (t != last_t)
       {
         fprintf(vadfile, "%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration, state2str(last_state));
-       // printf("%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration, state2str(last_state));
         last_state = state;
         last_t = t;
       }
@@ -167,8 +166,6 @@ int main(int argc, char *argv[])
   /* TODO: what do you want to print, for last frames? */
   if (t != last_t)
   {
-    //printf("%d\n", t);
-   //printf("%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration, state2str(last_state));
     fprintf(vadfile, "%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration + n_read / (float)sf_info.samplerate, state2str(state));
   }
   /* clean up: free memory, close open files */

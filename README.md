@@ -169,13 +169,35 @@ Ejercicios
 
   ![Senyal temporal, etiquetat manual i detecció](img/lab_vs_vad.png)
 
+  Podem observar que posant els següents valors com a paràmetres:
+
+* alfa0= 19
+* alfa1= 14
+* num_init= 7
+* num_MS= 0.08
+* num_MV= 0.02
+ 
+Obtenim els següents persentatges:
+
+![Percentateges dels sumatoris](img/resultat_pav2152_tot.png)
+
 - Explique, si existen. las discrepancias entre el etiquetado manual y la detección automática.
 
   Com s'observa amb la imatge, s'ha aconseguit una detecció relativament precisa, gràcies als diferents paràmetres d'entrada hem pogut 'adaptar' els umbrals en el nostre àudio per tal de detectar la veu amb precisió. Com a primer punt interessant, observem que la detecció allarga més els segments de veu, és a dir, no etiqueta com a silenci fins que no ha estat una estona a silenci. Això és degut a que som prudents a l'hora de passar a silenci. En els canvis de silenci a so, tenim uns etiquetats molt curts, que es corresponen a possible veu, que al final és veu. El mateix passa en el final de la trama de so, que s'etiqueten diversos silencis; són possibles silencis etiquetats finalment com a silenci. 
 
 - Evalúe los resultados sobre la base de datos `db.v4` con el script `vad_evaluation.pl` e inserte a 
   continuación las tasas de sensibilidad (*recall*) y precisión para el conjunto de la base de datos (sólo el resumen).
+Podem observar que posant els següents valors com a paràmetres:
 
+* alfa0= 9.9
+* alfa1= 3.3
+* num_init= 5
+* num_MS= 0.08
+* num_MV= 0.02
+
+Obtenim els següents persentatges:
+
+![Percentateges dels sumatoris](img/Summary.png)
 
 ### Trabajos de ampliación
 
